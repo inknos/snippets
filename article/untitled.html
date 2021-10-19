@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+<link rel="stylesheet" href="/_assets/main.css" />
+
+    <title>linux cmdline: Docker Cleanup containers - snippets</title>
+  <link rel="stylesheet" href="/_markdown_plugin_assets/highlight.js/atom-one-light.css" /></head>
+  <body>
+    <div class="main">
+      <nav class="navigation">
+        <a href="/">snippets</a>
+      </nav>
+      <article>
+        <header>
+          <h1 class="article-title">linux cmdline: Docker Cleanup containers</h1>
+          <div class="article-info">
+            <div>
+              <span
+                >Created At：<time datetime="1618314994637"
+                  >2021-04-13 13:56</time
+                ></span
+              >
+              <span
+                >Updated At：<time datetime="1621417762736"
+                  >2021-05-19 11:49</time
+                ></span
+              >
+            </div>
+            
+            <div>
+              Keywords: 
+              <span class="keyword">cmdline</span>
+              
+              <span class="keyword">linux</span>
+              
+            </div>
+            
+          </div>
+        </header>
+        <div class="article-content markdown-body"><h1 id="docker-how-to-cleanup-unused-resources">Docker - How to cleanup (unused) resources</h1>
+<p>Once in a while, you may need to cleanup resources (containers, volumes, images, networks) …</p>
+<h2 id="delete-volumes">delete volumes</h2>
+<div><pre class="hljs"><code><span class="hljs-comment"># see: https://github.com/chadoe/docker-cleanup-volumes    </span>
+$ docker volume rm $(docker volume ls -qf dangling=<span class="hljs-literal">true</span>)
+$ docker volume ls -qf dangling=<span class="hljs-literal">true</span> | xargs -r docker volume rm</code></pre></div>
+<h2 id="delete-networks">delete networks</h2>
+<div><pre class="hljs"><code>$ docker network ls  
+$ docker network ls | grep <span class="hljs-string">"bridge"</span>   
+$ docker network rm $(docker network ls | grep <span class="hljs-string">"bridge"</span> | awk <span class="hljs-string">'/ / { print $1 }'</span>)</code></pre></div>
+<h2 id="remove-docker-images">remove docker images</h2>
+<div><pre class="hljs"><code><span class="hljs-comment"># see: http://stackoverflow.com/questions/32723111/how-to-remove-old-and-unused-docker-images</span>
+$ docker images
+$ docker rmi $(docker images --filter <span class="hljs-string">"dangling=true"</span> -q --no-trunc)
+    
+$ docker images | grep <span class="hljs-string">"none"</span>
+$ docker rmi $(docker images | grep <span class="hljs-string">"none"</span> | awk <span class="hljs-string">'/ / { print $3 }'</span>)</code></pre></div>
+<h2 id="remove-docker-containers">remove docker containers</h2>
+<div><pre class="hljs"><code><span class="hljs-comment"># see: http://stackoverflow.com/questions/32723111/how-to-remove-old-and-unused-docker-images</span>
+$ docker ps
+$ docker ps -a
+$ docker rm $(docker ps -qa --no-trunc --filter <span class="hljs-string">"status=exited"</span>)</code></pre></div>
+<h2 id="resize-disk-space-for-docker-vm">Resize disk space for docker vm</h2>
+<div><pre class="hljs"><code>$ docker-machine create --driver virtualbox --virtualbox-disk-size <span class="hljs-string">"40000"</span> default</code></pre></div>
+</div>
+      </article>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+    <channel>
+        <title></title>
+        <link>undefined</link>
+        <description>undefined</description>
+        <lastBuildDate>Tue, 19 Oct 2021 09:50:17 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>Joplin Pages Publisher</generator>
+        <item>
+            <title><![CDATA[Test Snippet]]></title>
+            <guid>bb41c9723f0d4bef88b6f5514a57aa56</guid>
+            <pubDate>Tue, 19 Oct 2021 09:37:25 GMT</pubDate>
+            <content:encoded><![CDATA[<h1 id="test">Test</h1>
+<ul>
+<li>1</li>
+<li>2</li>
+<li>3</li>
+</ul>
+<div><pre class="hljs"><code><span class="hljs-built_in">echo</span> <span class="hljs-string">"Hello World!"</span></code></pre></div>
+]]></content:encoded>
+        </item>
+        <item>
+            <title><![CDATA[OBS and Virtual Cam (Linux) – Mathieu Acher – Associate Professor in Computer Science]]></title>
+            <guid>68e400391e054bfba146c42e1bb8f717</guid>
+            <pubDate>Wed, 12 May 2021 20:59:25 GMT</pubDate>
+            <content:encoded><![CDATA[<h1 id="mathieu-acher"><a title="http://blog.mathieuacher.com/" href="http://blog.mathieuacher.com/">Mathieu Acher</a></h1>
+<p>Associate Professor in Computer Science</p>
+<p><a title="http://blog.mathieuacher.com/" href="http://blog.mathieuacher.com/">Blog</a> <a title="http://blog.mathieuacher.com/about" href="http://blog.mathieuacher.com/about">About</a></p>
+<h1 id="obs-and-virtual-cam-linux">OBS and Virtual Cam (Linux)</h1>
+<p>As part of now remote conferences or courses, you may need to show many things: not only your slides, but also your terminal, your browser, or you! There are many (proprietary) systems out there for sharing your screen live: BigBlueButton, Jitsi, Google meet, Zoom, Skype, Teams, etc. My recent experience is that it does not work so well. Hence an idea is to create a <strong>virtual camera</strong> and project what you want through it. That is, you create this fake camera and then broadcast to any conferencing system (you “just” have to select the virtual cam). Some details below about I setup everything to achieve this on Linux with <a title="https://obsproject.com/" href="https://obsproject.com/">OBS</a>, <a title="https://github.com/umlaeute/v4l2loopback" href="https://github.com/umlaeute/v4l2loopback">v4l2loopback</a>, <a title="https://github.com/CatxFish/obs-v4l2sink" href="https://github.com/CatxFish/obs-v4l2sink">obs-v4l2sink</a>, <a title="https://ffmpeg.org/" href="https://ffmpeg.org/">ffmpeg</a>, etc.</p>
+<p>Olivier Barais, a colleague of mine, shared this idea of “fake camera” a few months ago. He mentionned this nice article <a title="http://blog.mathieuacher.com/OBSVirtualCam/%22Broadcast%20from%20OBS%20Studio%20To%20Everything%20In%20Linux%22" href="http://blog.mathieuacher.com/OBSVirtualCam/%22Broadcast%20from%20OBS%20Studio%20To%20Everything%20In%20Linux%22">https://blog.jbrains.ca/permalink/using-obs-studio-as-a-virtual-cam-on-linux</a>, but I didn’t get much attention at that time. But recently, I had some variants-troubles with Teams: basically the screensharing was very limited or simply not supported (aka crash). So I started to follow some tutorials.</p>
+<h3 id="v4l2loopback">v4l2loopback</h3>
+<p>There are at least two subtilities:</p>
+<ul>
+<li>don’t forget to install linux headers, on the right version… otherwise you won’t be able to build it. I suggest this line: <code>dnf install "kernel-devel-uname-r == $(uname -r)"</code></li>
+<li><code>sudo modprobe v4l2loopback card_label="Virtual Cam"</code> might not be sufficient. The camera will be created but not recognized by third party applications like OBS or Web browsers. I suggest to use this line: <code>sudo modprobe v4l2loopback devices=1 video_nr=10 card_label="OBS Cam" exclusive_caps=1</code></li>
+</ul>
+<p>For checking: <code>v4l2-ctl --all</code> and <code>v4l2-ctl -d /dev/video10 --list-formats-ext</code> as well as <code>ls -al /dev | grep video</code> (don’t forget to install <code>sudo dnf install v4l-utils</code>). At this step, some (hopefully all) applications might recognize your virtual camera. A useful link is <a title="https://webrtc.github.io/samples/src/content/devices/input-output/" href="https://webrtc.github.io/samples/src/content/devices/input-output/">https://webrtc.github.io/samples/src/content/devices/input-output/</a> to test whether your camera is recognized. But there is nothing to broadcast.</p>
+<h3 id="vl42sink">vl42sink</h3>
+<p>It’s an OBS plugin. I have impression there is some default plugins in the Windows version of OBS that simplifies your life. On Linux, it’s not really standardized (yet?). You can use <a title="https://github.com/CatxFish/obs-v4l2sink.git" href="https://github.com/CatxFish/obs-v4l2sink.git">this repo</a> or <a title="https://github.com/AndyHee/obs-v4l2sink" href="https://github.com/AndyHee/obs-v4l2sink">this one</a>, I don’t remember the actual differences.</p>
+<p>I highly recommend the reading of <a title="https://spot.livejournal.com/327990.html" href="https://spot.livejournal.com/327990.html">this article</a>. On Fedora at least, you should change some lines in <code>external/FindLibObs.cmake</code></p>
+<div><pre class="hljs"><code>@@ -<span class="hljs-number">95</span>,<span class="hljs-number">7</span> +<span class="hljs-number">95</span>,<span class="hljs-number">7</span> @@ <span class="hljs-keyword">if</span>(LIBOBS_FOUND)
+ 
+        set(LIBOBS_INCLUDE_DIRS <span class="hljs-variable">${LIBOBS_INCLUDE_DIR}</span> <span class="hljs-variable">${W32_PTHREADS_INCLUDE_DIR}</span>)
+        set(LIBOBS_LIBRARIES <span class="hljs-variable">${LIBOBS_LIB}</span> <span class="hljs-variable">${W32_PTHREADS_LIB}</span>)
+-       include(<span class="hljs-variable">${LIBOBS_INCLUDE_DIR}</span><span class="hljs-regexp">/../</span>cmake<span class="hljs-regexp">/external/</span>ObsPluginHelpers.cmake)
++       include(<span class="hljs-regexp">/usr/</span>lib64<span class="hljs-regexp">/cmake/</span>LibObs/ObsPluginHelpers.cmake) </code></pre></div>
+<p>otherwise it won’t build. Also <code>cmake -DLIBOBS_INCLUDE_DIR="/usr/include/obs" -DCMAKE_INSTALL_PREFIX=/usr ..</code> is the right approach. And finally <code>sudo mv /usr/lib/obs-plugins/v4l2sink.so /usr/lib64/obs-plugins/v4l2sink.so</code></p>
+<h3 id="obs">OBS</h3>
+<p>The plugin should now work on OBS, that is, under the “Tools” menu there should be now “V4L2 Video Output”. Some strange things may happen with the “format”, but it’s OK</p>
+<h3 id="misc">Misc</h3>
+<p>I still have some issues for sharing the content of <em>some</em> applications that are not listed within OBS (eg I can’t share the terminal content). But it’s basically the same limitations with other systems. It’s due to issues with Wayland/X11. An OBS workaround is <code>obs-xdg-portal</code>, this issue was quite useful <a title="https://gitlab.gnome.org/feaneron/obs-xdg-portal/-/issues/4" href="https://gitlab.gnome.org/feaneron/obs-xdg-portal/-/issues/4">https://gitlab.gnome.org/feaneron/obs-xdg-portal/-/issues/4</a> note: you can also experiment with <code>ffmpeg</code> and redirect the streaming of OBS.</p>
+<p>A bit chaotic, but well it’s also a good opportunity to learn many things about video, build, Linux, etc. Now you can compose scenes in OBS, and broadcast through the virtual cam in Jitsi, Zoom, Teams, etc. This virtual camera can be seen as an independent way to share whatever you want and whatever the technology is… And you can leverage the power of OBS.</p>
+<p>Written on September 10, 2020</p>
+<p>source:  <a title="http://blog.mathieuacher.com/OBSVirtualCam/" href="http://blog.mathieuacher.com/OBSVirtualCam/">http://blog.mathieuacher.com/OBSVirtualCam/</a>
+other:   <a title="https://github.com/AndyHee/obs-v4l2sink" href="https://github.com/AndyHee/obs-v4l2sink">https://github.com/AndyHee/obs-v4l2sink</a></p>
+]]></content:encoded>
+        </item>
+        <item>
+            <title><![CDATA[linux cmdline: Docker Cleanup containers]]></title>
+            <guid>4ec46b7cf36a4bcc903b5582214e0aff</guid>
+            <pubDate>Tue, 13 Apr 2021 11:56:34 GMT</pubDate>
+            <content:encoded><![CDATA[<h1 id="docker-how-to-cleanup-unused-resources">Docker - How to cleanup (unused) resources</h1>
+<p>Once in a while, you may need to cleanup resources (containers, volumes, images, networks) …</p>
+<h2 id="delete-volumes">delete volumes</h2>
+<div><pre class="hljs"><code><span class="hljs-comment"># see: https://github.com/chadoe/docker-cleanup-volumes    </span>
+$ docker volume rm $(docker volume ls -qf dangling=<span class="hljs-literal">true</span>)
+$ docker volume ls -qf dangling=<span class="hljs-literal">true</span> | xargs -r docker volume rm</code></pre></div>
+<h2 id="delete-networks">delete networks</h2>
+<div><pre class="hljs"><code>$ docker network ls  
+$ docker network ls | grep <span class="hljs-string">"bridge"</span>   
+$ docker network rm $(docker network ls | grep <span class="hljs-string">"bridge"</span> | awk <span class="hljs-string">'/ / { print $1 }'</span>)</code></pre></div>
+<h2 id="remove-docker-images">remove docker images</h2>
+<div><pre class="hljs"><code><span class="hljs-comment"># see: http://stackoverflow.com/questions/32723111/how-to-remove-old-and-unused-docker-images</span>
+$ docker images
+$ docker rmi $(docker images --filter <span class="hljs-string">"dangling=true"</span> -q --no-trunc)
+    
+$ docker images | grep <span class="hljs-string">"none"</span>
+$ docker rmi $(docker images | grep <span class="hljs-string">"none"</span> | awk <span class="hljs-string">'/ / { print $3 }'</span>)</code></pre></div>
+<h2 id="remove-docker-containers">remove docker containers</h2>
+<div><pre class="hljs"><code><span class="hljs-comment"># see: http://stackoverflow.com/questions/32723111/how-to-remove-old-and-unused-docker-images</span>
+$ docker ps
+$ docker ps -a
+$ docker rm $(docker ps -qa --no-trunc --filter <span class="hljs-string">"status=exited"</span>)</code></pre></div>
+<h2 id="resize-disk-space-for-docker-vm">Resize disk space for docker vm</h2>
+<div><pre class="hljs"><code>$ docker-machine create --driver virtualbox --virtualbox-disk-size <span class="hljs-string">"40000"</span> default</code></pre></div>
+]]></content:encoded>
+        </item>
+    </channel>
+</rss>
